@@ -10,90 +10,75 @@ Output: 7, nums = [0,0,1,1,2,3,3,_]
 Explanation: Your function should return length = 7, with the first seven elements of nums being modified to 0, 0, 1, 1, 2, 3, 3 respectively. It doesn't matter what you leave beyond the returned length.
 ```
 
-### Solution Approach
-To solve this problem, we can use the two-pointer technique. We maintain two pointers: one for iterating through the array (`i`), and one for the position of the next element to be placed in the result (`j`). Additionally, we keep a counter to track the occurrences of the current element.
+### Approach:
 
-Here are the detailed steps:
+1. **Two-Pointer Technique**: We'll use two pointers to track the position in the array:
+   - **Pointer `i`**: Tracks the position where the next unique or valid duplicate element (appearing at most twice) should be placed.
+   - **Pointer `j`**: Iterates through the array and evaluates each element.
 
-1. **Initialization**:
-   - If the array is empty, return 0.
-   - Initialize `j` to 1 (since the first element is always valid).
-   - Initialize a counter to track the occurrences of the current element, starting with 1.
+2. **Condition for Duplicates**: Since the array is sorted, duplicates will be consecutive. To ensure that each element appears at most twice, we can compare the current element `nums[j]` with the element at `nums[i-2]`:
+   - If `nums[j] == nums[i-2]`, skip `nums[j]` because it would create more than two occurrences.
+   - Otherwise, copy `nums[j]` to `nums[i]` and increment `i`.
 
-2. **Iteration**:
-   - Iterate through the array with the `i` pointer starting from the second element.
-   - For each element, compare it with the previous element (`nums[i]` with `nums[i-1]`).
-   - If they are the same, increment the counter.
-   - If they are different, reset the counter to 1.
-   - If the counter is less than or equal to 2, assign the current element to `nums[j]` and increment `j`.
+3. **Return the Length (`k`)**: After processing, the first `k` elements of the array (where `k = i`) will be the final result. The elements beyond `k` don’t matter, as they will be ignored.
 
-3. **Completion**:
-   - After the iteration, `j` will be the length of the array with the allowed duplicates.
+### Solution in Python:
 
-### Python Code
 ```python
-def remove_duplicates(nums):
+def removeDuplicates(nums):
     if len(nums) <= 2:
         return len(nums)
     
-    j = 1
-    count = 1
+    i = 2  # Start from the third element because the first two can always stay
+    for j in range(2, len(nums)):
+        # If current number is not equal to the number two steps back, place it in the result
+        if nums[j] != nums[i - 2]:
+            nums[i] = nums[j]
+            i += 1
     
-    for i in range(1, len(nums)):
-        if nums[i] == nums[i - 1]:
-            count += 1
-        else:
-            count = 1
-        
-        if count <= 2:
-            j += 1
-            nums[j] = nums[i]
-    
-    return j
+    return i
 ```
 
-### Java Code
-```java
-public class Solution {
-    public int removeDuplicates(int[] nums) {
-        if (nums.length <= 2) {
-            return nums.length;
-        }
-        
-        int j = 1;
-        int count = 1;
-        
-        for (int i = 1; i < nums.length; i++) {
-            if (nums[i] == nums[i - 1]) {
-                count++;
-            } else {
-                count = 1;
-            }
-            
-            if (count <= 2) {
-                j++;
-                nums[j] = nums[i];
-            }
-        }
-        
-        return j;
-    }
-}
-```
+### Explanation of the Code:
 
-### Explanation
+- **Initial Check**: If the array has fewer than or equal to 2 elements, we return the length as no duplicates need to be removed.
+- **Two Pointers**: We initialize `i = 2` to start from the third position because the first two elements are guaranteed to remain.
+- **For Loop**: We iterate through the array starting from the third element (`j = 2`), checking if `nums[j] != nums[i-2]`:
+   - If true, we move `nums[j]` to `nums[i]` and increment `i` to track the new position for unique/valid elements.
+- **Return**: At the end of the loop, `i` will represent the length `k` of the modified array, where each unique element appears at most twice.
 
-1. **Edge Case Handling**:
-   - If the array length is less than or equal to 2, the function immediately returns the length of the array since all elements can remain.
+### Example Walkthrough:
 
-2. **Iteration**:
-   - We start iterating from the second element (`i = 1`).
-   - For each element, we compare it with the previous element (`nums[i-1]`).
-   - If they are the same, we increment the counter.
-   - If they are different, we reset the counter to 1.
-   - If the counter is less than or equal to 2, we place the current element at position `j` and increment `j`.
+#### Example 1:
+**Input**: `nums = [1, 1, 1, 2, 2, 3]`
 
-3. **Returning the Result**:
-   - `j` represents the index for the next element to be placed. Therefore, the length of the array with the allowed duplicates is `j + 1`.
+- Initial array: `[1, 1, 1, 2, 2, 3]`
+- First two elements are kept as is.
+- At `j = 2`, `nums[2] == nums[0]`, so we skip this duplicate.
+- At `j = 3`, `nums[3] != nums[1]`, so we move `nums[3]` to `nums[2]`, resulting in `[1, 1, 2, 2, 2, 3]`.
+- At `j = 4`, `nums[4] != nums[2]`, so we move `nums[4]` to `nums[3]`, resulting in `[1, 1, 2, 2, 3, 3]`.
+- At `j = 5`, `nums[5] != nums[3]`, so we move `nums[5]` to `nums[4]`.
 
-This approach ensures that we traverse the array only once, making it an O(n) solution, and we use only O(1) extra space for the pointers and the counter.
+**Output**: `k = 5`, and `nums = [1, 1, 2, 2, 3]` for the first `k` elements.
+
+#### Example 2:
+**Input**: `nums = [0, 0, 1, 1, 1, 1, 2, 3, 3]`
+
+- Initial array: `[0, 0, 1, 1, 1, 1, 2, 3, 3]`
+- First two elements are kept as is.
+- At `j = 2`, `nums[2] != nums[0]`, so we move `nums[2]` to `nums[2]`.
+- At `j = 3`, `nums[3] != nums[1]`, so we move `nums[3]` to `nums[3]`.
+- At `j = 4`, `nums[4] == nums[2]`, so we skip this duplicate.
+- At `j = 5`, `nums[5] == nums[3]`, so we skip this duplicate.
+- At `j = 6`, `nums[6] != nums[4]`, so we move `nums[6]` to `nums[4]`, resulting in `[0, 0, 1, 1, 2, 1, 2, 3, 3]`.
+- At `j = 7`, `nums[7] != nums[5]`, so we move `nums[7]` to `nums[5]`.
+- At `j = 8`, `nums[8] != nums[6]`, so we move `nums[8]` to `nums[6]`.
+
+**Output**: `k = 7`, and `nums = [0, 0, 1, 1, 2, 3, 3]` for the first `k` elements.
+
+### Complexity Analysis:
+
+- **Time Complexity**: `O(n)`, where `n` is the length of the array. We only iterate through the array once.
+- **Space Complexity**: `O(1)`, since we are modifying the array in-place without using extra space. 
+
+This solution efficiently solves the problem by ensuring each unique element appears at most twice, while maintaining the relative order of the elements and modifying the array in-place.
